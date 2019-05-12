@@ -1,28 +1,18 @@
-{
-    "variables":{
-        "secret" :"",
-        "access" : ""
-      },
-    "builders": [
-       {
-        "type": "amazon-ebs",
-        "access_key": "{{user `access`}}",
-        "secret_key": "{{user `secret`}}",
-        "region": "us-west-2",
-        "instance_type": "t2.micro",
-        "ami_name": "ami_3",
-        "source_ami": "ami-005bdb005fb00e791",
-        "ssh_username": "ubuntu"
-       }
-    ],
-    "provisioners":[
-        {
-            "type": "shell",
-            "inline": [
-                "sudo apt-get update",
-                "sudo apt-get install git",
-                "sudo apt-get install tree" 
-            ]
+pipeline {
+    agent any 
+    stages {
+        stage('source') { 
+            steps {
+                git credentialsId: 'c76fffcf-cab5-4537-9c61-2cda28bb596d', url: 'https://github.com/wakaleo/game-of-life.git'            }
         }
-    ]
+        stage('build') { 
+            steps {
+                sh label: '', script: 'mvn package'            }
+        }
+        stage('aritifacts') { 
+            steps {
+                archiveArtifacts '**/target/*.jar' 
+            }
+        }
+    }
 }
